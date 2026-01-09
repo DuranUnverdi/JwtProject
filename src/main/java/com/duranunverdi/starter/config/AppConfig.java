@@ -17,11 +17,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Optional;
 
 @Configuration
-@RequiredArgsConstructor
 public class AppConfig {
 
     private final UserRepository userRepository;
 
+    public AppConfig(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
     @Bean
     public UserDetailsService userDetailsService() {
         return username ->
@@ -32,6 +34,7 @@ public class AppConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
+
 
         DaoAuthenticationProvider authProvider =
                 new DaoAuthenticationProvider(userDetailsService());
