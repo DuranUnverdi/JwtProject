@@ -1,28 +1,54 @@
 package com.duranunverdi.starter.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
-@NoArgsConstructor
-@AllArgsConstructor
-
 public class User implements UserDetails {
+
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "username")
+
+    @Column(nullable = false, unique = true)
     private String username;
-    @Column(name = "password")
+
+    @Column(nullable = false)
     private String password;
 
+    /* ====== GETTER / SETTER ====== */
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /* ====== SPRING SECURITY ====== */
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -30,12 +56,22 @@ public class User implements UserDetails {
     }
 
     @Override
-    public @Nullable String getPassword() {
-        return null;
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
     @Override
-    public String getUsername() {
-        return null;
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
