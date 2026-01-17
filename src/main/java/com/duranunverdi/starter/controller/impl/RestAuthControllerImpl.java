@@ -3,6 +3,7 @@ package com.duranunverdi.starter.controller.impl;
 import com.duranunverdi.starter.controller.IRestAuthController;
 import com.duranunverdi.starter.dto.DtoUser;
 import com.duranunverdi.starter.jwt.AuthRequest;
+import com.duranunverdi.starter.jwt.AuthResponse;
 import com.duranunverdi.starter.service.IAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +22,15 @@ public class RestAuthControllerImpl implements IRestAuthController {
     }
 
     @Override
-    @PostMapping("/authenticate")
+    @PostMapping("/register")
     public DtoUser registerNewUser(@RequestBody @Valid AuthRequest authRequest) {
         return authService.registerNewUser(authRequest);
+    }
+
+    @Override
+    @PostMapping("/authenticate")
+    public AuthResponse authenticateUser(@RequestBody @Valid AuthRequest authRequest) {
+        return authService.authenticateUser(authRequest);
     }
 
 }
