@@ -1,71 +1,54 @@
 package com.duranunverdi.starter.jwt;
 
+import com.duranunverdi.starter.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
-import java.security.Key;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.Map;
-import java.util.function.Function;
 
-@Component
+@Service
 public class JwtService {
-    public static final String SECRET_KEY = "hQlF89bi0tiqUcRG1cxD2Eejano5bfZq7gky+5og/3o=";
 
-    public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = Map.of();
-        claims.put("role", "USER");
+    // Secret key (örnek, production için güçlü key kullan)
+    private static final String SECRET_KEY = "mySuperSecretKey12345";
+
+    // Token süresi (1 saat)
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60;
+
+    // Token oluştur
+    public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setClaims(claims)
+                .setSubject(user.getUsername()) // username'i subject olarak ekliyoruz
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2))
-                .signWith(getKey(), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes(StandardCharsets.UTF_8))
                 .compact();
     }
 
-
-    public <T> T expertToken(String token, Function<Claims, T> claimsResolver) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(getKey())
-                .build()
-                .parseClaimsJws(token).getBody();
-        return claimsResolver.apply(claims);
-
+    // Token geçerli mi?
+    public boolean isTokenValid(String token, User user) {
+        String username = getUserByToken(token);
+        return (username.equals(user.getUsername()) && !isTokenExpired(token));
     }
 
+    // Token'dan username al
     public String getUserByToken(String token) {
-        return expertToken(token, Claims::getSubject);
+        return extractAllClaims(token).getSubject();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(getKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-
-            String username = claims.getSubject();
-            Date expiration = claims.getExpiration();
-
-            return username.equals(userDetails.getUsername())
-                    && expiration.after(new Date());
-
-        } catch (Exception e) {
-            // expired, invalid signature, malformed token
-            return false;
-        }
+    // Token süresi dolmuş mu?
+    private boolean isTokenExpired(String token) {
+        return extractAllClaims(token).getExpiration().before(new Date());
     }
 
-    public SecretKey getKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+    // Tüm claimleri al
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+                .parseClaimsJws(token)
+                .getBody();
     }
 }
