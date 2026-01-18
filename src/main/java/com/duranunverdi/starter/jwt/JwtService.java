@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Map;
 
 @Service
 public class JwtService {
@@ -20,12 +21,28 @@ public class JwtService {
 
     // Token oluştur
     public String generateToken(User user) {
+        Map<String, Object> claims = Map.of(); // Ek claimler eklenebilir
         return Jwts.builder()
                 .setSubject(user.getUsername()) // username'i subject olarak ekliyoruz
+                .addClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes(StandardCharsets.UTF_8))
                 .compact();
+    }
+
+
+    public Object getClaimsByKey(String token, String key) {
+        Claims claims = getClaims(token);
+        return claims.get(key);
+    }
+
+    public Claims getClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+                .parseClaimsJws(token)
+                .getBody();
+
     }
 
     // Token geçerli mi?
@@ -46,9 +63,7 @@ public class JwtService {
 
     // Tüm claimleri al
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
-                .parseClaimsJws(token)
-                .getBody();
+        Claims claims = getClaims(token);
+        return claims;
     }
 }
