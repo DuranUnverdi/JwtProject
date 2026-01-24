@@ -1,5 +1,6 @@
 package com.duranunverdi.starter.config;
 
+import com.duranunverdi.starter.jwt.AuthEntryPoint;
 import com.duranunverdi.starter.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final AuthEntryPoint authEntryPoint;
 
 
     @Bean
@@ -33,6 +35,10 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider) // 🔥 ŞART
+                .exceptionHandling(ex ->
+                        ex.authenticationEntryPoint(authEntryPoint)
+                )
+
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
