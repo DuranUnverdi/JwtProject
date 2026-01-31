@@ -20,6 +20,7 @@ public class SecurityConfig {
 
     public static final String AUTHENTICATE = "/authenticate";
     public static final String REGISTER = "/register";
+    public static final String REFRESH_TOKEN = "/refresh-token";
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
@@ -45,7 +46,7 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/authenticate", "/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, AUTHENTICATE, REGISTER,REFRESH_TOKEN).permitAll()
                         .anyRequest().authenticated()
                 );
 
