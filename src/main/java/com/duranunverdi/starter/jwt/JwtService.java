@@ -17,7 +17,7 @@ public class JwtService {
     private static final String SECRET_KEY = "mySuperSecretKey12345";
 
     // Token süresi (1 saat)
-    private static final long EXPIRATION_TIME = 1000 *5;
+    private static final long EXPIRATION_TIME = 1000 *60*60;
 
     // Token oluştur
     public String generateToken(User user) {
